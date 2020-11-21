@@ -12,6 +12,8 @@ from nltk.stem import WordNetLemmatizer
 
 from gensim.models import Word2Vec
 import gensim.downloader as api
+from gensim.models import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec
 
 # wv = api.load('word2vec-google-news-300')
 # print(wv['king'])
@@ -82,15 +84,8 @@ def gloveTrain(data, filename):
 	f = open(filename + ".pkl", 'wb')
 	pickle.dump(vectorDict, f)
 
-def findTopClosest(bingLiuDict, engHindiDict):
-	word2vecEnglish = Word2Vec.load("models/word2vec/english.model")
-	word2vecHindi = Word2Vec.load("models/word2vec/hindi.model")
-
-	wvEnglish = word2vecEnglish.wv
-	wvHindi = word2vecHindi.wv
-
+def closest(bingLiuDict, engHindiDict, wvEnglish, wvHindi):
 	l1df = pd.read_csv('L1.csv')
-	
 	newAdditions = []
 	for i in range(len(l1df)):
 		englishWord = l1df.iloc[i,0]
@@ -115,9 +110,34 @@ def findTopClosest(bingLiuDict, engHindiDict):
 					if hw in engHindiDict[ew]:
 						arr = [ew, hw, polarity]
 						newAdditions.append(arr)
-	print(newAdditions)
+	# print(newAdditions)
+	return newAdditions
 
 
+def findTopClosestWord2Vec(bingLiuDict, engHindiDict):
+	word2vecEnglish = Word2Vec.load("models/word2vec/english.model")
+	word2vecHindi = Word2Vec.load("models/word2vec/hindi.model")
+
+	wvEnglish = word2vecEnglish.wv
+	wvHindi = word2vecHindi.wv
+
+	return closest(bingLiuDict, engHindiDict, wvEnglish, wvHindi)
+
+
+def findTopClosestGlove(bingLiuDict, engHindiDict):
+	gloveEnglish_file = 'models/glove/english.txt'
+	tmp_file_english = 'testEnglish.txt'
+
+	gloveHindi_file = 'models/glove/hindi.txt'
+	tmp_file_hindi = 'testHindi.txt'
+
+	_ = glove2word2vec(gloveEnglish_file, tmp_file_english)
+	modelEnglish = KeyedVectors.load_word2vec_format(tmp_file_english)
+
+	_ = glove2word2vec(gloveHindi_file, tmp_file_hindi)
+	modelHindi = KeyedVectors.load_word2vec_format(tmp_file_hindi)
+
+	return closest(bingLiuDict, engHindiDict, modelEnglish, modelHindi)
 
 
 
@@ -175,8 +195,11 @@ if __name__ == "__main__":
 	if not os.path.isfile("models/glove/hindi.pkl"):
 		gloveTrain(data2, "hindi")
 
-	print("top closest")
-	findTopClosest(bingLiuDict, engHindiDict)
+	print("top closest word2Vec")
+	word2vecAddition = findTopClosestWord2Vec(bingLiuDict, engHindiDict)
+
+	print("top closest glove")
+	gloveAddition = findTopClosestGlove(bingLiuDict, engHindiDict)
 
 
 
