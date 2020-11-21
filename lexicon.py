@@ -82,6 +82,45 @@ def gloveTrain(data, filename):
 	f = open(filename + ".pkl", 'wb')
 	pickle.dump(vectorDict, f)
 
+def findTopClosest(bingLiuDict, engHindiDict):
+	word2vecEnglish = Word2Vec.load("models/word2vec/english.model")
+	word2vecHindi = Word2Vec.load("models/word2vec/hindi.model")
+
+	wvEnglish = word2vecEnglish.wv
+	wvHindi = word2vecHindi.wv
+
+	l1df = pd.read_csv('L1.csv')
+	
+	newAdditions = []
+	for i in range(len(l1df)):
+		englishWord = l1df.iloc[i,0]
+		hindiWord = l1df.iloc[i,1]
+		polarity = bingLiuDict[englishWord]
+
+		try:
+			englishSimilar = wvEnglish.most_similar(positive=[englishWord], topn=5)
+		except KeyError:
+			continue
+
+		try:
+			hindiSimilar = wvHindi.most_similar(positive=[hindiWord], topn=5)
+		except KeyError:
+			continue
+
+		for ewt in englishSimilar:
+			ew = ewt[0]
+			if ew in engHindiDict:
+				for hwt in hindiSimilar:
+					hw = hwt[0]
+					if hw in engHindiDict[ew]:
+						arr = [ew, hw, polarity]
+						newAdditions.append(arr)
+	print(newAdditions)
+
+
+
+
+
 
 if __name__ == "__main__":
 	f = open("assignment_4_files/BingLiu.csv", "r")
@@ -99,9 +138,11 @@ if __name__ == "__main__":
 		d[0] = d[0].decode('utf-8')
 		d[1] = d[1].decode('utf-8')
 		if d[0] not in engHindiDict:
-			engHindiDict[d[0]] = [d[1]]
+			# engHindiDict[d[0]] = [d[1]]
+			engHindiDict[d[0]] = {d[1]:1}
 		else:
-			engHindiDict[d[0]].append(d[1])
+			# engHindiDict[d[0]].append(d[1])
+			engHindiDict[d[0]][d[1]] = 1
 
 
 	createL1(bingLiuDict, engHindiDict)
@@ -122,7 +163,7 @@ if __name__ == "__main__":
 		data2[i] = data2[i].split(' ')
 
 	# preprocessEnglish(data1)
-	preprocessHindi(rawHindi)
+	# preprocessHindi(rawHindi)
 
 	if not os.path.isfile("models/word2vec/english.model"):
 		word2VecTrain(data1, "english.model")
@@ -133,6 +174,11 @@ if __name__ == "__main__":
 		gloveTrain(data1, "english")
 	if not os.path.isfile("models/glove/hindi.pkl"):
 		gloveTrain(data2, "hindi")
+
+	print("top closest")
+	findTopClosest(bingLiuDict, engHindiDict)
+
+
 
 
 
