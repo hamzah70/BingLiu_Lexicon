@@ -46,7 +46,7 @@ def preprocessHindi(data):
 		line += '\n'
 		f.write(line)
 	f.close()
-				
+
 
 def createL1(bingLiuDict, engHindiDict):
 	arr = []
@@ -60,14 +60,16 @@ def createL1(bingLiuDict, engHindiDict):
 	df = pd.DataFrame(arr)
 	df.to_csv("L1.csv", index=False, header=False)
 
+
 def word2VecTrain(data, filename):
-	model = Word2Vec(sentences=data, window=5, min_count=1, workers=4)
+	model = Word2Vec(sentences=data, window=10, min_count=1, workers=4)
 	filename = "models/word2vec/" + filename
 	model.save(filename)
 	# print(model.wv["ब्रॉडकास्टर"])
 	# print(model.wv["कॉन्टैक्ट"])
 	# print(model.wv["नहीं"])
 	# print(model.wv["उपलब्ध"])
+
 
 def gloveTrain(data, filename):
 	filename = "models/glove/" + filename
@@ -83,6 +85,7 @@ def gloveTrain(data, filename):
 		vectorDict[d[0]] = arr
 	f = open(filename + ".pkl", 'wb')
 	pickle.dump(vectorDict, f)
+
 
 def closest(bingLiuDict, engHindiDict, wvEnglish, wvHindi):
 	l1df = pd.read_csv('L1.csv')
@@ -197,9 +200,11 @@ if __name__ == "__main__":
 
 	print("top closest word2Vec")
 	word2vecAddition = findTopClosestWord2Vec(bingLiuDict, engHindiDict)
+	print(word2vecAddition)
 
 	print("top closest glove")
 	gloveAddition = findTopClosestGlove(bingLiuDict, engHindiDict)
+	print(gloveAddition)
 
 
 
