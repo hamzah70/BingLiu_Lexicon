@@ -61,14 +61,7 @@ def createL1(bingLiuDict, engHindiDict):
 	df.to_csv("L1.csv", index=False, header=False)
 
 
-def word2VecTrain(data, filename):
-	model = Word2Vec(sentences=data, window=10, min_count=1, workers=4)
-	filename = "models/word2vec/" + filename
-	model.save(filename)
-	# print(model.wv["ब्रॉडकास्टर"])
-	# print(model.wv["कॉन्टैक्ट"])
-	# print(model.wv["नहीं"])
-	# print(model.wv["उपलब्ध"])
+
 
 
 def gloveTrain(data, filename):
@@ -111,9 +104,9 @@ def closest(bingLiuDict, engHindiDict, wvEnglish, wvHindi):
 				for hwt in hindiSimilar:
 					hw = hwt[0]
 					if hw in engHindiDict[ew]:
-						arr = [ew, hw, polarity]
+						arr = (ew, hw, polarity)
 						newAdditions.append(arr)
-	# print(newAdditions)
+
 	return newAdditions
 
 
@@ -143,7 +136,14 @@ def findTopClosestGlove(bingLiuDict, engHindiDict):
 	return closest(bingLiuDict, engHindiDict, modelEnglish, modelHindi)
 
 
-
+def word2VecTrain(data, filename,window1):
+	model = Word2Vec(sentences=data, window=window1, min_count=1, workers=4,seed = 1)
+	filename = "models/word2vec/" + filename
+	model.save(filename)
+	# print(model.wv["ब्रॉडकास्टर"])
+	# print(model.wv["कॉन्टैक्ट"])
+	# print(model.wv["नहीं"])
+	# print(model.wv["उपलब्ध"])
 
 if __name__ == "__main__":
 	f = open("assignment_4_files/BingLiu.csv", "r")
@@ -188,10 +188,11 @@ if __name__ == "__main__":
 	# preprocessEnglish(data1)
 	# preprocessHindi(rawHindi)
 
+	
 	if not os.path.isfile("models/word2vec/english.model"):
-		word2VecTrain(data1, "english.model")
+		word2VecTrain(data1, "english.model",39)
 	if not os.path.isfile("models/word2vec/hindi.model"):
-		word2VecTrain(data2, "hindi.model")
+		word2VecTrain(data2, "hindi.model",39)
 
 	if not os.path.isfile("models/glove/english.pkl"):
 		gloveTrain(data1, "english")
@@ -200,13 +201,18 @@ if __name__ == "__main__":
 
 	print("top closest word2Vec")
 	word2vecAddition = findTopClosestWord2Vec(bingLiuDict, engHindiDict)
-	print(word2vecAddition)
-
+	print(len(set(word2vecAddition)))
+	print(set(word2vecAddition))
+	# print(word2vecAddition)
 	print("top closest glove")
 	gloveAddition = findTopClosestGlove(bingLiuDict, engHindiDict)
-	print(gloveAddition)
+	print(len(set(gloveAddition)))
+	print(set(gloveAddition))
 
-
+	print("Total unique additions")
+	print(len(set(word2vecAddition + gloveAddition)))
+	print(set(word2vecAddition + gloveAddition))
+	
 
 
 
