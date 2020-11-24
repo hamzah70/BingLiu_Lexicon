@@ -244,7 +244,9 @@ if __name__ == "__main__":
 	glovedf = pd.DataFrame(gloveL1)
 	glovedf.to_csv("L1_glove.csv", index=False, header=False)
 
-
+	l1 = l1 + word2vecAddition + gloveAddition
+	df = pd.DataFrame(l1)
+	df.to_csv("L1_total.csv", index=False, header=False)
 
 	print("Total unique additions")
 	print(len(word2vecAddition + gloveAddition))
