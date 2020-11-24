@@ -29,7 +29,7 @@ def preprocessEnglish(data):
 		for j, word in enumerate(line):
 			word = lemmatizer.lemmatize(word)
 			data[i][j] = ps.stem(word) # stemming
-	f = open('preprocessed/english.txt', 'w')#preprocessed files are dumped onto preprocessed folder
+	f = open('preprocessed/english.txt', 'w')# preprocessed files are dumped onto preprocessed folder
 	for line in data:
 		line.append('\n')
 		line = ' '.join(line)
@@ -224,24 +224,28 @@ if __name__ == "__main__":
 
 
 	#new additions are found.
-	
+	l1 = pd.read_csv("L1.csv").values.tolist()
 	print("top closest word2Vec")
 	word2vecAddition = findTopClosestWord2Vec(bingLiuDict, engHindiDict)
 	print(len(set(word2vecAddition)))
-	print(set(word2vecAddition))
+	word2vecAddition = list(set(word2vecAddition))
+	print(word2vecAddition)
+	w2vL1 = l1 + word2vecAddition
+	w2vdf = pd.DataFrame(w2vL1)
+	w2vdf.to_csv("L1_word2vec.csv", index=False, header=False)
 
+	# print(word2vecAddition)
 	print("top closest glove")
 	gloveAddition = findTopClosestGlove(bingLiuDict, engHindiDict)
-	print(len(set(gloveAddition)))
-	print(set(gloveAddition))
+	gloveAddition = list(set(gloveAddition))
+	print(len(gloveAddition))
+	print(gloveAddition)
+	gloveL1 = l1 + gloveAddition
+	glovedf = pd.DataFrame(gloveL1)
+	glovedf.to_csv("L1_glove.csv", index=False, header=False)
+
+
 
 	print("Total unique additions")
-	print(len(set(word2vecAddition + gloveAddition)))
-	print(set(word2vecAddition + gloveAddition))
-	
-
-
-
-
-
-
+	print(len(word2vecAddition + gloveAddition))
+	print(word2vecAddition + gloveAddition)
